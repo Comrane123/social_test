@@ -1,22 +1,32 @@
-<div class="post media">
-	<h3>{{ post.message_html|safe }}</h3>
-	<div class="media-body">
-		<strong>{{ post.user.username }}</strong>
-		<h5 class="media-heading">
-			<span class="username"><a href="{% url 'posts:for_user' username=post.user.username %}">@{{ post.user.username }}</a></span>
-			<time class="time"><a href="{% url 'posts:single' username=post.user.username pk=post.pk %}">{{ post.created_at }}</a></time>
-		</h5>
-
-
-
-
-		<div class="media-footer">
-			{% if user.is_authenticated and post.user == user and not hide_delete %}
-				<a href="{% url 'posts:delete' pk=post.pk %}" title="delete" class="btn btn-simple">
-					<span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
-					<span class="text-danger icon-label">Delete</span>
-				</a>
-			{% endif %}
-		</div>
-	</div>
+<div class="box">
+    <article class="media">
+        <div class="media-content">
+            <div class="content">
+                <p>
+                    <span class="username"><a
+                            href="{% url 'posts:for_user' username=post.user.username %}">@{{ post.user.username }}</a></span>
+                    <time class="time"><a
+                            href="{% url 'posts:single' username=post.user.username pk=post.pk %}">{{ post.created_at }}</a>
+                    </time>
+                    <br>
+                <h3>{{ post.message_html|safe }}</h3>
+            </div>
+            <nav class="level is-mobile">
+                <div class="level-left">
+                    {% if user.is_authenticated and post.user == user and not hide_delete %}
+                    <a href="{% url 'posts:delete' pk=post.pk %}" class="level-item" aria-label="retweet">
+                        <span class="icon is-small">
+                          <i class="delete" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                    {% endif %}
+                    <a class="level-item" aria-label="like">
+                        <span class="icon is-small">
+                          <i class="fas fa-heart" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </article>
 </div>
