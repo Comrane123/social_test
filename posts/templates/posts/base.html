@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Title -->
+    <title>News</title>
+
+    <!-- Styles -->
+    {% load django_simple_bulma %}
+    {% bulma %}
+    {% font_awesome %}
+
+</head>
+
+<body>
+<!-- Nav -->
+<nav class="navbar is-dark">
+    <div class="navbar-brand">
+        <a href="/" class="navbar-item"><strong>Social test project</strong></a>
+    </div>
+
+    <div class="navbar-menu">
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'posts:create' %}" class="button is-success is-light">Submit</a>
+                        <a href="{% url 'accounts:logout' %}" class="button is-danger">Log out</a>
+                    {% else %}
+                        <a href="{% url 'accounts:signup' %}" class="button is-success"><strong>Sign up</strong></a>
+                        <a href="{% url 'accounts:login' %}" class="button is-light">Log in</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- End Nav -->
+
+<!-- Content -->
+<section class="section">
+    {% block content %}
+    {% endblock %}
+</section>
+<!-- End Content -->
+</body>
+</html>
