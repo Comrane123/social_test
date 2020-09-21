@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 import django_heroku
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,12 +41,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.humanize",
     "rest_framework",
     "crispy_forms",
     "django_simple_bulma",
-    "posts",
-    "accounts",
+    "posts.apps.PostsConfig",
+    "accounts.apps.AccountsConfig",
 ]
 
 MIDDLEWARE = [
@@ -127,6 +127,10 @@ STATIC_URL = "/static/"
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "accounts.authentication.JWTAuthentication",
+        # "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+    ),
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
@@ -139,3 +143,5 @@ STATICFILES_FINDERS = [
     # Now add our custom SimpleBulma one.
     "django_simple_bulma.finders.SimpleBulmaFinder",
 ]
+
+JWT_SECRET_KEY = "ggfhjsdfkjlghadf;lkjghnfsdl;kjghsdfjgkl"

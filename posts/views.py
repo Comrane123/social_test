@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
 
-from django.urls import reverse_lazy
-from django.http import Http404
-from django.views import generic
+from django.urls import reverse_lazy, reverse
+from django.http import Http404, HttpResponseRedirect
+from django.views import generic, View
 
 from braces.views import SelectRelatedMixin
 
@@ -71,3 +72,31 @@ class DeletePost(LoginRequiredMixin, SelectRelatedMixin, generic.DeleteView):
     def delete(self, *args, **kwargs):
         messages.success(self.request, "Post Deleted")
         return super().delete(*args, **kwargs)
+
+
+class UpdatePostVote(LoginRequiredMixin, View):
+    login_url = "/login/"
+    redirect_field_name = "next"
+
+    def get(self, request, *args, **kwargs):
+
+        post_id = self.kwargs.get("post_id", None)
+        opinion = self.kwargs.get("opinion", None)  # like button clicked
+
+        post = get_object_or_404(models.Post, id=post_id)
+
+        try:
+            # If child Like model does not exit then create
+            post.likes
+        except models.Post.likes.RelatedObjectDoesNotExist as identifier:
+            models.Like.objects.create(post=post)
+
+        if opinion.lower() == "like":
+
+            if request.user in post.likes.users.all():
+                post.likes.users.remove(request.user)
+            else:
+                post.likes.users.add(request.user)
+        else:
+            return HttpResponseRedirect(reverse("home"))
+        return HttpResponseRedirect(reverse("home"))
