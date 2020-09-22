@@ -14,6 +14,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     message = models.TextField()
     message_html = models.TextField(editable=False)
+    likes = models.ManyToManyField(User, related_name="post_like")
 
     def __str__(self):
         return self.message
@@ -22,8 +23,8 @@ class Post(models.Model):
         self.message_html = misaka.html(self.message)
         super().save(*args, **kwargs)
 
-    def get_total_likes(self):
-        return self.likes.users.count()
+    def total_likes(self):
+        return self.likes.count()
 
     def get_absolute_url(self):
         return reverse(
@@ -33,15 +34,3 @@ class Post(models.Model):
     class Meta:
         ordering = ["-created_at"]
         unique_together = ["user", "message"]
-
-
-class Like(models.Model):
-    """ Like model for posts """
-
-    post = models.OneToOneField(Post, related_name="likes", on_delete=models.CASCADE)
-    users = models.ManyToManyField(User, related_name="requirement_post_likes")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.post)[:30]

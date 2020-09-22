@@ -11,4 +11,5 @@ class PostSerializer(serializers.ModelSerializer):
             "user",
             "created_at",
             "message",
+            "likes"
         ]

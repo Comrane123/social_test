@@ -1,27 +1,39 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-
 from django.urls import reverse_lazy, reverse
 from django.http import Http404, HttpResponseRedirect
-from django.views import generic, View
+from django.views import generic
 
 from braces.views import SelectRelatedMixin
 
-from . import models
+from .models import Post
 
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 
+def LikeView(request, pk):
+    post = get_object_or_404(Post, id=request.POST.get('post_id'))
+    liked = False
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+
+    return HttpResponseRedirect(reverse('posts:single', args=[str(post.user), str(pk)]))
+
+
 class PostList(SelectRelatedMixin, generic.ListView):
-    model = models.Post
+    model = Post
     select_related = ("user",)
 
 
 class UserPosts(generic.ListView):
-    model = models.Post
+    model = Post
     template_name = "posts/user_post_list.html"
 
     def get_queryset(self):
@@ -41,17 +53,31 @@ class UserPosts(generic.ListView):
 
 
 class PostDetail(SelectRelatedMixin, generic.DetailView):
-    model = models.Post
+    model = Post
     select_related = ("user",)
 
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(user__username__iexact=self.kwargs.get("username"))
 
+    def get_context_data(self, **kwargs):
+        context = super(PostDetail, self).get_context_data(**kwargs)
+
+        post_for_likes = get_object_or_404(Post, id=self.kwargs['pk'])
+        total_likes = post_for_likes.total_likes()
+
+        liked = False
+        if post_for_likes.likes.filter(id=self.request.user.id).exists():
+            liked = True
+
+        context["total_likes"] = total_likes
+        context["liked"] = liked
+        return context
+
 
 class CreatePost(LoginRequiredMixin, SelectRelatedMixin, generic.CreateView):
     fields = ("message",)
-    model = models.Post
+    model = Post
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -61,7 +87,7 @@ class CreatePost(LoginRequiredMixin, SelectRelatedMixin, generic.CreateView):
 
 
 class DeletePost(LoginRequiredMixin, SelectRelatedMixin, generic.DeleteView):
-    model = models.Post
+    model = Post
     select_related = ("user",)
     success_url = reverse_lazy("home")
 
@@ -72,31 +98,3 @@ class DeletePost(LoginRequiredMixin, SelectRelatedMixin, generic.DeleteView):
     def delete(self, *args, **kwargs):
         messages.success(self.request, "Post Deleted")
         return super().delete(*args, **kwargs)
-
-
-class UpdatePostVote(LoginRequiredMixin, View):
-    login_url = "/login/"
-    redirect_field_name = "next"
-
-    def get(self, request, *args, **kwargs):
-
-        post_id = self.kwargs.get("post_id", None)
-        opinion = self.kwargs.get("opinion", None)  # like button clicked
-
-        post = get_object_or_404(models.Post, id=post_id)
-
-        try:
-            # If child Like model does not exit then create
-            post.likes
-        except models.Post.likes.RelatedObjectDoesNotExist as identifier:
-            models.Like.objects.create(post=post)
-
-        if opinion.lower() == "like":
-
-            if request.user in post.likes.users.all():
-                post.likes.users.remove(request.user)
-            else:
-                post.likes.users.add(request.user)
-        else:
-            return HttpResponseRedirect(reverse("home"))
-        return HttpResponseRedirect(reverse("home"))
