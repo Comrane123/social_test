@@ -41,9 +41,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "crispy_forms",
     "django_simple_bulma",
+    "drf_yasg",
+
     "posts.apps.PostsConfig",
     "accounts.apps.AccountsConfig",
 ]
@@ -145,3 +148,13 @@ STATICFILES_FINDERS = [
 ]
 
 JWT_SECRET_KEY = "ggfhjsdfkjlghadf;lkjghnfsdl;kjghsdfjgkl"
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        "Auth Token eg [Bearer (JWT) ]": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
