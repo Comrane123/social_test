@@ -5,9 +5,9 @@
                 <p>
                     <span class="username"><a
                             href="{% url 'posts:for_user' username=post.user.username %}">@{{ post.user.username }}</a></span>
-                    <time class="time"><a
-                            href="{% url 'posts:single' username=post.user.username pk=post.pk %}">{{ post.created_at }}</a>
-                    </time>
+                    <br>
+                    User {{ post.user }} last seen
+                    <time>{{ post.last_login }}</time>
                     <br>
                 <h3>{{ post.message_html|safe }}</h3>
             </div>
@@ -20,22 +20,27 @@
                         </span>
                         </a>
                     {% endif %}
-                    <form action="{% url 'posts:like-post' post.pk %}" method="POST">
+
+                    <form action="{% url 'posts:like-post-view' %}" method="POST">
                         {% csrf_token %}
                         {% if user.is_authenticated %}
-                            {% if liked %}
-                                <button type="submit" name="post_id" value="{{ post.id }}"
-                                        class="button is-small is-danger is-rounded">Unlike
-                                </button>
-                            {% else %}
-                                <button type="submit" name="post_id" value="{{ post.id }}"
-                                        class="button is-small is-success is-rounded">Like
-                                </button>
-                            {% endif %}
+                            <input type="hidden" name="post_id" value={{ obj.id }}>
+                            <button type="submit" name="post_id" value="{{ post.id }}"
+                                    class="button is-small is-rounded">
+                                {% if not liked %}
+                                    Like
+                                {% elif liked %}
+                                    Unlike
+                                {% endif %}
+                            </button>
                         {% else %}
                             <small><a href="{% url 'accounts:login' %}">Login to like</a></small>
                         {% endif %}
                         - {{ post.total_likes }} likes
+                        <br>
+                        <time class="time"><a
+                                href="{% url 'posts:single' username=post.user.username pk=post.pk %}">{{ post.created_at }}</a>
+                        </time>
                     </form>
                 </div>
             </nav>

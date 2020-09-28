@@ -1,30 +1,55 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.http import Http404, HttpResponseRedirect
-from django.views import generic
+from django.views import generic, View
 
 from braces.views import SelectRelatedMixin
 
-from .models import Post
+from .models import Post, Like
+from accounts.models import Profile
 
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 
-def LikeView(request, pk):
-    post = get_object_or_404(Post, id=request.POST.get('post_id'))
-    liked = False
-    if post.likes.filter(id=request.user.id).exists():
-        post.likes.remove(request.user)
-        liked = False
-    else:
-        post.likes.add(request.user)
-        liked = True
+def like_unlike_post(request):
+    user = request.user
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id')
+        post_obj = Post.objects.get(id=post_id)
+        profile = Profile.objects.get(user=user)
 
-    return HttpResponseRedirect(reverse('posts:single', args=[str(post.user), str(pk)]))
+        if profile in post_obj.liked.all():
+            post_obj.liked.remove(profile.user)
+        else:
+            post_obj.liked.add(profile.user)
+
+        like, created = Like.objects.get_or_create(user=profile, post_id=post_id)
+
+        if not created:
+            if like.value == 'Like':
+                like.value = 'Unlike'
+                like.save()
+
+            else:
+                like.value = 'Like'
+                like.save()
+        else:
+            like.value = 'Like'
+
+            post_obj.save()
+            like.save()
+
+        # data = {
+        #     'value': like.value,
+        #     'likes': post_obj.liked.all().count()
+        # }
+
+        # return JsonResponse(data, safe=False)
+    return redirect('home')
 
 
 class PostList(SelectRelatedMixin, generic.ListView):
@@ -60,19 +85,23 @@ class PostDetail(SelectRelatedMixin, generic.DetailView):
         queryset = super().get_queryset()
         return queryset.filter(user__username__iexact=self.kwargs.get("username"))
 
-    def get_context_data(self, **kwargs):
-        context = super(PostDetail, self).get_context_data(**kwargs)
-
-        post_for_likes = get_object_or_404(Post, id=self.kwargs['pk'])
-        total_likes = post_for_likes.total_likes()
-
-        liked = False
-        if post_for_likes.likes.filter(id=self.request.user.id).exists():
-            liked = True
-
-        context["total_likes"] = total_likes
-        context["liked"] = liked
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(PostDetail, self).get_context_data(**kwargs)
+    #
+    #     post_for_likes = get_object_or_404(Post, id=self.kwargs["pk"])
+    #     # total_likes = post_for_likes.total_likes()
+    #
+    #     liked = False
+    #     if post_for_likes.objects.filter(likes__isnull=True):
+    #         liked = True
+    #
+    #     user = User.objects.get(username=self.request.user.username)
+    #     last_login = user.last_login
+    #
+    #     context["last_login"] = last_login
+    #     # context["total_likes"] = total_likes
+    #     context["liked"] = liked
+    #     return context
 
 
 class CreatePost(LoginRequiredMixin, SelectRelatedMixin, generic.CreateView):

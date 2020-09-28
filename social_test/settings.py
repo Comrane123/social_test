@@ -41,12 +41,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "crispy_forms",
     "django_simple_bulma",
     "drf_yasg",
-
     "posts.apps.PostsConfig",
     "accounts.apps.AccountsConfig",
 ]
@@ -59,6 +57,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # 'accounts.middleware.middleware.LastUserActivityMiddleware',
 ]
 
 ROOT_URLCONF = "social_test.urls"
@@ -132,7 +131,6 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 10,
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "accounts.authentication.JWTAuthentication",
-        # "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
     ),
 }
 
@@ -150,11 +148,11 @@ STATICFILES_FINDERS = [
 JWT_SECRET_KEY = "ggfhjsdfkjlghadf;lkjghnfsdl;kjghsdfjgkl"
 
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
+    "SECURITY_DEFINITIONS": {
         "Auth Token eg [Bearer (JWT) ]": {
             "type": "apiKey",
             "name": "Authorization",
-            "in": "header"
+            "in": "header",
         }
     }
 }

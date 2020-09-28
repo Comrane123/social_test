@@ -25,7 +25,7 @@ from posts.views import PostList
 schema_view = get_schema_view(
     openapi.Info(
         title="Social_test API",
-        default_version='v1',
+        default_version="v1",
         description="All API endpoints",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email=""),
@@ -42,6 +42,10 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("posts/", include("posts.urls", namespace="posts")),
     path("api/", include("posts.api.urls")),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path(
+        "swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
