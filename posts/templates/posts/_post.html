@@ -7,7 +7,7 @@
                             href="{% url 'posts:for_user' username=post.user.username %}">@{{ post.user.username }}</a></span>
                     <br>
                     User {{ post.user }} last seen
-                    <time>{{ post.last_login }}</time>
+                    <time>{{ last_login }}</time>
                     <br>
                 <h3>{{ post.message_html|safe }}</h3>
             </div>

@@ -1,9 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
-from django.http import Http404, HttpResponseRedirect
-from django.views import generic, View
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.http import Http404
+from django.views import generic
 
 from braces.views import SelectRelatedMixin
 
@@ -17,8 +17,8 @@ User = get_user_model()
 
 def like_unlike_post(request):
     user = request.user
-    if request.method == 'POST':
-        post_id = request.POST.get('post_id')
+    if request.method == "POST":
+        post_id = request.POST.get("post_id")
         post_obj = Post.objects.get(id=post_id)
         profile = Profile.objects.get(user=user)
 
@@ -30,26 +30,20 @@ def like_unlike_post(request):
         like, created = Like.objects.get_or_create(user=profile, post_id=post_id)
 
         if not created:
-            if like.value == 'Like':
-                like.value = 'Unlike'
+            if like.value == "Like":
+                like.value = "Unlike"
                 like.save()
 
             else:
-                like.value = 'Like'
+                like.value = "Like"
                 like.save()
         else:
-            like.value = 'Like'
+            like.value = "Like"
 
             post_obj.save()
             like.save()
 
-        # data = {
-        #     'value': like.value,
-        #     'likes': post_obj.liked.all().count()
-        # }
-
-        # return JsonResponse(data, safe=False)
-    return redirect('home')
+    return redirect("home")
 
 
 class PostList(SelectRelatedMixin, generic.ListView):
@@ -73,6 +67,8 @@ class UserPosts(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        last_login = self.post_user.last_login
+        context["last_login"] = last_login
         context["post_user"] = self.post_user
         return context
 
@@ -84,24 +80,6 @@ class PostDetail(SelectRelatedMixin, generic.DetailView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(user__username__iexact=self.kwargs.get("username"))
-
-    # def get_context_data(self, **kwargs):
-    #     context = super(PostDetail, self).get_context_data(**kwargs)
-    #
-    #     post_for_likes = get_object_or_404(Post, id=self.kwargs["pk"])
-    #     # total_likes = post_for_likes.total_likes()
-    #
-    #     liked = False
-    #     if post_for_likes.objects.filter(likes__isnull=True):
-    #         liked = True
-    #
-    #     user = User.objects.get(username=self.request.user.username)
-    #     last_login = user.last_login
-    #
-    #     context["last_login"] = last_login
-    #     # context["total_likes"] = total_likes
-    #     context["liked"] = liked
-    #     return context
 
 
 class CreatePost(LoginRequiredMixin, SelectRelatedMixin, generic.CreateView):

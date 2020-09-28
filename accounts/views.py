@@ -1,13 +1,20 @@
-from rest_framework.generics import GenericAPIView
-from .serializers import UserSerializer, LoginSerializer
+import jwt
+
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from django.contrib import auth
-import jwt
 from django.urls import reverse_lazy
+
 from django.views.generic import CreateView
+from rest_framework.generics import GenericAPIView
+
 from . import forms
+from .serializers import UserSerializer, LoginSerializer
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class RegisterView(CreateView):
@@ -52,3 +59,14 @@ class LoginAPIView(GenericAPIView):
         return Response(
             {"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
         )
+
+
+class LastLoginAPIView(GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def get_serializer_context(self):
+        context = super(LastLoginAPIView, self).get_serializer_context()
+        context.update({
+            "last_login": User.last_login
+        })
+        return context

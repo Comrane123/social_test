@@ -37,14 +37,16 @@ class Post(models.Model):
 
 
 LIKE_CHOISES = (
-    ('Like', 'Like'),
-    ('Unlike', 'Unlike'),
+    ("Like", "Like"),
+    ("Unlike", "Unlike"),
 )
 
 
 class Like(models.Model):
     post = models.ForeignKey(Post, related_name="likes", on_delete=models.CASCADE)
-    user = models.ForeignKey(Profile, related_name='requirement_post_likes', on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        Profile, related_name="requirement_post_likes", on_delete=models.CASCADE
+    )
     value = models.CharField(choices=LIKE_CHOISES, max_length=8)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

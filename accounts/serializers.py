@@ -1,5 +1,6 @@
-from rest_framework import serializers
+from rest_framework import serializers, generics
 from django.contrib.auth.models import User
+from .models import Profile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,3 +28,10 @@ class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "password"]
+
+
+class LastLoginSerializer(serializers.ModelSerializer):
+    last_login = serializers.DateTimeField()
+
+    class Meta:
+        model = Profile
