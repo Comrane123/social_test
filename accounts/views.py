@@ -66,7 +66,5 @@ class LastLoginAPIView(GenericAPIView):
 
     def get_serializer_context(self):
         context = super(LastLoginAPIView, self).get_serializer_context()
-        context.update({
-            "last_login": User.last_login
-        })
+        context.update({"last_login": User.last_login})
         return context
