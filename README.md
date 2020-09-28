@@ -1,6 +1,6 @@
 # social_test
 
-Blog with like system, api endpoints and JWT login.
+Blog with like system, api endpoints and JWT authentication.
 
 ## Getting Started
 
